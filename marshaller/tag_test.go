@@ -7,11 +7,16 @@ import (
 )
 
 type SearchByTagsReq struct {
+	Device           *Device           `json:"device,omitempty" es:"term,device"`
 	VipLeftDuration  *VIPLeftDuration  `json:"vip_left_duration,omitempty" es:"range,vip_left_duration"`
 	RegTime          *RegTime          `json:"register_time,omitempty" es:"range,reg_time"`
 	RegRangeDuration *RegRangeDuration `json:"register_range_time,omitempty" es:"range,reg_range_duration"`
 	Active           *Active           `json:"active,omitempty" es:"range,active"`
 	RegSource        *RegSource        `json:"reg_source,omitempty" es:"terms,reg_source"`
+}
+
+type Device struct {
+	DeviceType string `json:"device_type" es:"value,device_type"` // 设备类型  ios | android
 }
 
 // VIPLeftDuration vip剩余时长
@@ -46,6 +51,9 @@ type Active struct {
 func Test(t *testing.T) {
 	now := time.Now()
 	req := &SearchByTagsReq{
+		Device: &Device{
+			DeviceType: "ios",
+		},
 		VipLeftDuration: &VIPLeftDuration{
 			LeftDurationMin: now.Add(-time.Hour * 24).Unix(),
 			LeftDurationMax: now.Add(time.Hour * 48).Unix(),

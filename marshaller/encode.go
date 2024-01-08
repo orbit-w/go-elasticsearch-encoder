@@ -33,7 +33,7 @@ func marshalBool(val reflect.Value) (*Query, error) {
 			if s, err := marshalBool(v); err != nil && s != nil {
 				sql.AppendMust(s)
 			}
-		case esRange, "term", esTerms:
+		case esRange, esTerm, esTerms:
 			results, err := marshalSub(v, f)
 			if err != nil {
 				return err
@@ -65,7 +65,7 @@ func marshalSub(val reflect.Value, cur *Field) ([]any, error) {
 			if s != nil {
 				result = append(result, s)
 			}
-		case esRange, "term", esTerms:
+		case esRange, esTerm, esTerms:
 			list, err := marshalSub(v, f)
 			if err != nil {
 				return err
@@ -177,7 +177,7 @@ func kindErrField(val reflect.Value) error {
 
 func kindErrTag(est string, val reflect.Value) error {
 	switch est {
-	case esTerms, esRange, "term":
+	case esTerms, esRange, esTerm:
 		switch val.Kind() {
 		case reflect.Ptr:
 			return nil
