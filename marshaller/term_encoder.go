@@ -13,11 +13,27 @@ func init() {
 	reg(esTerm, termEncoder.Encode, termEncoder.Sql)
 }
 
-func (re *TermEncoder) Encode(query any, cur, field *Field) error {
+type Term map[string]map[string]map[string]any
+
+func (t Term) Invalid() bool {
+	term, ok := t[esTerm]
+	if !ok || term == nil {
+		return true
+	}
+	return false
+}
+
+func (re *TermEncoder) Encode(query any, _, field *Field) error {
 	switch field.est {
-	case esEnumLogic:
-	case "value":
-		m := query.(map[string]map[string]map[string]any)
+	case esTerm:
+		if field.op.omitempty && IsZero(field.value) {
+			return nil
+		}
+
+		m := query.(Term)
+		if v := m[esTerm]; v == nil {
+			m[esTerm] = map[string]map[string]any{}
+		}
 		m[esTerm][field.esName] = map[string]any{
 			"value": field.value,
 			"boost": 1.0,
@@ -26,8 +42,8 @@ func (re *TermEncoder) Encode(query any, cur, field *Field) error {
 	return nil
 }
 
-func (re *TermEncoder) Sql(field *Field) any {
-	return map[string]map[string]map[string]any{
-		esTerm: map[string]map[string]any{},
-	}
+func (re *TermEncoder) Sql(_ *Field) any {
+	query := Term{}
+	query[esTerm] = nil
+	return query
 }

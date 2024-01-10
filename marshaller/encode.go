@@ -1,9 +1,7 @@
 package marshaller
 
 import (
-	"fmt"
 	"reflect"
-	"strings"
 )
 
 type Field struct {
@@ -11,6 +9,7 @@ type Field struct {
 	est    string
 	esName string
 	value  any //field 值
+	op     tagOption
 }
 
 // Marshal 将结构体解析成elasticsearch query 语句
@@ -33,12 +32,20 @@ func marshalBool(val reflect.Value) (*Query, error) {
 			if s, err := marshalBool(v); err != nil && s != nil {
 				sql.AppendMust(s)
 			}
-		case esRange, esTerm, esTerms:
+		case esRange:
 			results, err := marshalSub(v, f)
 			if err != nil {
 				return err
 			}
 			sql.AppendMust(results)
+		case esTerm, esTerms:
+			re, err := marshalTerm(f)
+			if err != nil {
+				return err
+			}
+			if !re.Invalid() {
+				sql.AppendMust(re)
+			}
 		}
 		return nil
 	}); err != nil {
@@ -65,12 +72,20 @@ func marshalSub(val reflect.Value, cur *Field) ([]any, error) {
 			if s != nil {
 				result = append(result, s)
 			}
-		case esRange, esTerm, esTerms:
+		case esRange:
 			list, err := marshalSub(v, f)
 			if err != nil {
 				return err
 			}
 			result = append(result, list...)
+		case esTerm, esTerms:
+			re, err := marshalTerm(f)
+			if err != nil {
+				return err
+			}
+			if !re.Invalid() {
+				result = append(result, re)
+			}
 		default:
 			if err := parser(f); err != nil {
 				return err
@@ -84,6 +99,16 @@ func marshalSub(val reflect.Value, cur *Field) ([]any, error) {
 		result = append(result, sql)
 	}
 	return result, nil
+}
+
+func marshalTerm(cur *Field) (IQuery, error) {
+	fact, _ := getFactory(cur.est)
+	parser, sql := fact.Create(cur)
+
+	if err := parser(cur); err != nil {
+		return nil, err
+	}
+	return sql.(IQuery), nil
 }
 
 func parseFields(val reflect.Value, handle func(v reflect.Value, f *Field) error) error {
@@ -115,7 +140,7 @@ func parseFields(val reflect.Value, handle func(v reflect.Value, f *Field) error
 		if tag == "" || tag == ignoreTag {
 			continue
 		}
-		est, esName, err := parseFieldTag(tf.Name, tag)
+		est, esName, err, op := parseFieldTag(tf.Name, tag)
 		if err != nil {
 			return err
 		}
@@ -129,26 +154,12 @@ func parseFields(val reflect.Value, handle func(v reflect.Value, f *Field) error
 			value:  field.Interface(),
 			est:    est,
 			esName: esName,
+			op:     op,
 		}); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func parseFieldTag(fieldName, tag string) (est, esName string, err error) {
-	parts := strings.Split(tag, ",")
-	if len(parts) == 0 {
-		err = fmt.Errorf("invalid es tag: %s", tag)
-		return
-	}
-	est = parts[0]
-	if len(parts) == 2 {
-		esName = parts[1]
-	} else {
-		esName = SnakeCase(fieldName)
-	}
-	return
 }
 
 func kindErr(val reflect.Value) error {
@@ -177,7 +188,7 @@ func kindErrField(val reflect.Value) error {
 
 func kindErrTag(est string, val reflect.Value) error {
 	switch est {
-	case esTerms, esRange, esTerm:
+	case esRange:
 		switch val.Kind() {
 		case reflect.Ptr:
 			return nil

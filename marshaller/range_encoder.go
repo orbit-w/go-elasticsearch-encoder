@@ -15,10 +15,10 @@ func init() {
 
 func (re *RangeEncoder) Encode(query any, cur, field *Field) error {
 	switch field.est {
-	case esEnumLogic:
-	default:
+	case "gte", "gt", "lte", "lt":
 		m := query.(map[string]map[string]map[string]any)
 		m[esRange][cur.esName][field.est] = field.value
+	default:
 	}
 	return nil
 }

@@ -4,9 +4,9 @@ const (
 	esTag     = "es"
 	ignoreTag = "-"
 
-	esEnumLogic = "logic"
-	esBool      = "bool"
-
-	logicMust   = "must"
-	logicShould = "should"
+	esBool = "bool"
 )
+
+type IQuery interface {
+	Invalid() bool
+}
