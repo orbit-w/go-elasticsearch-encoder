@@ -20,7 +20,7 @@ type tagOption struct {
 //		分析器会以找到的第一个非参数字符作为name
 //
 //	目前的可选参数：
-//		omitempty: 基本类型如果为零值,
+//		omitempty: 基本类型如果为零值, 则忽略，不会自动生成对应的query子语句
 func parseFieldTag(fieldName, tag string) (est, esName string, err error, op tagOption) {
 	parts := strings.Split(tag, ",")
 	if len(parts) == 0 {

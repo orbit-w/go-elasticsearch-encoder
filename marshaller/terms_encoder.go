@@ -32,6 +32,9 @@ func (re *TermsEncoder) Encode(query any, cur, field *Field) error {
 	case esTerms:
 		switch t := field.value.(type) {
 		case string:
+			if t == "" {
+				return nil
+			}
 			parts := strings.Split(t, ",")
 			if len(parts) == 0 {
 				return fmt.Errorf("invalid terms valud: %s", cur.esName)
