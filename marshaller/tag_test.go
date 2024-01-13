@@ -8,7 +8,7 @@ import (
 )
 
 func Test(t *testing.T) {
-	member := &ESMember{
+	member := ESMember{
 		DeviceType: "ios",
 		RegSource:  "1,2,3",
 		RegTime: &RegTime{

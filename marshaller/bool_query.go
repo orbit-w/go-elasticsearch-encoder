@@ -1,36 +1,40 @@
 package marshaller
 
 type Query struct {
-	Bool *BoolQuery `json:"bool"`
+	BoolQuery *BoolQuery `json:"query"`
 }
 
-func NewQuery() *Query {
-	return &Query{
-		Bool: new(BoolQuery),
+type BoolQuery struct {
+	Bool *Bool `json:"bool"`
+}
+
+func NewBoolQuery() *BoolQuery {
+	return &BoolQuery{
+		Bool: new(Bool),
 	}
 }
 
-func (q *Query) AppendMust(v ...any) {
+func (q *BoolQuery) AppendMust(v ...any) {
 	q.Bool.AppendMust(v...)
 }
 
-func (q *Query) AppendShould(v ...any) {
+func (q *BoolQuery) AppendShould(v ...any) {
 	q.Bool.AppendShould(v...)
 }
 
-func (q *Query) AppendFilter(v ...any) {
+func (q *BoolQuery) AppendFilter(v ...any) {
 	q.Bool.AppendFilter(v...)
 }
 
-// BoolQuery represents a bool query.
-type BoolQuery struct {
+// Bool represents a bool query.
+type Bool struct {
 	Must    []any `json:"must,omitempty"`
 	Filter  []any `json:"filter,omitempty"`
 	Should  []any `json:"should,omitempty"`
 	MustNot []any `json:"must_not,omitempty"`
 }
 
-func (bq *BoolQuery) AppendMust(list ...any) {
+func (bq *Bool) AppendMust(list ...any) {
 	if bq.Must == nil {
 		bq.Must = make([]any, 0, 1<<3)
 	}
@@ -42,7 +46,7 @@ func (bq *BoolQuery) AppendMust(list ...any) {
 	}
 }
 
-func (bq *BoolQuery) AppendShould(list ...any) {
+func (bq *Bool) AppendShould(list ...any) {
 	if bq.Should == nil {
 		bq.Should = make([]any, 0, 1<<3)
 	}
@@ -54,7 +58,7 @@ func (bq *BoolQuery) AppendShould(list ...any) {
 	}
 }
 
-func (bq *BoolQuery) AppendFilter(list ...any) {
+func (bq *Bool) AppendFilter(list ...any) {
 	if bq.Filter == nil {
 		bq.Filter = make([]any, 0, 1<<3)
 	}

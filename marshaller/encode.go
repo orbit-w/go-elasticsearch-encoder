@@ -14,17 +14,26 @@ type Field struct {
 
 // Marshal 将结构体解析成elasticsearch query 语句
 func Marshal(v any) (*Query, error) {
-	val := reflect.ValueOf(v)
-	return marshalBool(val)
+	return marshal(v)
 }
 
-func marshalBool(val reflect.Value) (*Query, error) {
+func marshal(v any) (*Query, error) {
+	val := reflect.ValueOf(v)
+	bq, err := marshalBool(val)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Query{BoolQuery: bq}, nil
+}
+
+func marshalBool(val reflect.Value) (*BoolQuery, error) {
 	if err := kindErr(val); err != nil {
 		return nil, err
 	}
 
 	var (
-		sql = NewQuery()
+		sql = NewBoolQuery()
 	)
 	if err := parseFields(val, func(v reflect.Value, f *Field) error {
 		switch f.est {
@@ -168,6 +177,8 @@ func kindErr(val reflect.Value) error {
 		if val.IsNil() {
 			return ErrNil
 		}
+		return nil
+	case reflect.Struct:
 		return nil
 	default:
 		return ErrKind
