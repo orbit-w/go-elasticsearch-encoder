@@ -46,7 +46,7 @@ func marshalBool(val reflect.Value) (*BoolQuery, error) {
 			if err != nil {
 				return err
 			}
-			sql.AppendMust(results)
+			sql.AppendMust(results...)
 		case esTerm, esTerms:
 			re, err := marshalTerm(f)
 			if err != nil {
