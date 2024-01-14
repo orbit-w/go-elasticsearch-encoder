@@ -1,4 +1,4 @@
-package marshaller
+package encoder
 
 const (
 	esTag     = "es"
@@ -8,5 +8,5 @@ const (
 )
 
 type IQuery interface {
-	Invalid() bool
+	Json() map[string]any
 }

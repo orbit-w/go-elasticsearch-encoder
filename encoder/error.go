@@ -1,4 +1,4 @@
-package marshaller
+package encoder
 
 import "errors"
 

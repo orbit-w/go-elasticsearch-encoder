@@ -1,13 +1,22 @@
-package marshaller
+package encoder
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
 const (
 	tagOptionOmitempty = "omitempty"
 )
+
+type Field struct {
+	name   string
+	est    string
+	esName string
+	value  any //field 值
+	op     tagOption
+}
 
 type tagOption struct {
 	omitempty bool
@@ -47,6 +56,47 @@ func parseTagOption(parts []string) (op tagOption) {
 		}
 	}
 	return
+}
+
+func parseFields(val reflect.Value, handle func(v reflect.Value, f *Field) error) error {
+	switch val.Kind() {
+	case reflect.Ptr:
+		if val.IsNil() {
+			return nil
+		}
+		// 获取指针指向的元素（结构体）
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		return ErrKind
+	}
+
+	// 遍历结构体的所有字段
+	for j := 0; j < val.NumField(); j++ {
+		// 获取字段的值
+		field := val.Field(j)
+		// 获取字段的类型
+		tf := val.Type().Field(j)
+		tag := tf.Tag.Get(esTag)
+		if tag == "" || tag == ignoreTag {
+			continue
+		}
+		est, esName, err, op := parseFieldTag(tf.Name, tag)
+		if err != nil {
+			return err
+		}
+		if err = handle(field, &Field{
+			name:   tf.Name,
+			value:  field.Interface(),
+			est:    est,
+			esName: esName,
+			op:     op,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func parseName(parts []string, fieldName string) (esName string) {
