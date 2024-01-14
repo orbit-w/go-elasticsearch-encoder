@@ -12,19 +12,10 @@ type Field struct {
 	op     tagOption
 }
 
-// Marshal 将结构体解析成elasticsearch query 语句
-func Marshal(v any) (*Query, error) {
-	return marshal(v)
-}
-
-func marshal(v any) (*Query, error) {
+// MarshalQueryBool 将结构体解析成elasticsearch query bool 语句
+func MarshalQueryBool(v any) (*BoolQuery, error) {
 	val := reflect.ValueOf(v)
-	bq, err := marshalBool(val)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Query{BoolQuery: bq}, nil
+	return marshalBool(val)
 }
 
 func marshalBool(val reflect.Value) (*BoolQuery, error) {

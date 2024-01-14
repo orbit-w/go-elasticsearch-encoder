@@ -2,6 +2,10 @@ package marshaller
 
 type Query struct {
 	BoolQuery *BoolQuery `json:"query"`
+	Sort      map[string]any
+}
+
+type Sort struct {
 }
 
 type BoolQuery struct {

@@ -17,7 +17,7 @@ func Test(t *testing.T) {
 		},
 	}
 
-	query, err := Marshal(member)
+	query, err := MarshalQueryBool(member)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
