@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// Marshal 将结构体解析成elasticsearch query 语句
-func Marshal(v any) (elastic.Query, error) {
+// MarshalBoolQuery 将结构体解析成elasticsearch BoolQuery 语句
+func MarshalBoolQuery(v any) (elastic.Query, error) {
 	val := reflect.ValueOf(v)
 	query, err := marshal(val, &Field{est: esBool})
 	if err != nil {
