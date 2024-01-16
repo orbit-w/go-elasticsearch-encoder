@@ -5,6 +5,10 @@ const (
 	ignoreTag = "-"
 
 	esBool = "bool"
+
+	esRange = "range"
+	esTerm  = "term"
+	esTerms = "terms"
 )
 
 type IQuery interface {
