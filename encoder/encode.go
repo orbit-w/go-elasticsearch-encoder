@@ -2,7 +2,7 @@ package encoder
 
 import (
 	"fmt"
-	"github.com/olivere/elastic/v6"
+	"github.com/olivere/elastic/v7"
 	"reflect"
 	"strings"
 )
